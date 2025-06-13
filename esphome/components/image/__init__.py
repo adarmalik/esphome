@@ -595,7 +595,11 @@ async def write_image(config, all_frames=False):
                 encoder.encode(pixels[row * width + col])
             encoder.end_row()
 
-    rhs = [HexInt(x) for x in encoder.data]
+    le = config[CONF_LITTLE_ENDIAN]
+    if le:
+        rhs = [HexInt(encoder.data[i+1] if i % 2 == 0 else encoder.data[i-1] for i in range(len(encoder.data)))]
+    else:
+        rhs = [HexInt(x) for x in encoder.data]
     prog_arr = cg.progmem_array(config[CONF_RAW_DATA_ID], rhs)
     image_type = get_image_type_enum(type)
     trans_value = get_transparency_enum(encoder.transparency)
